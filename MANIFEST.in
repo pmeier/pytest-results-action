@@ -1,0 +1,10 @@
+recursive-exclude .github *
+recursive-exclude example_tests *
+
+exclude .flake8
+exclude .gitignore
+exclude .pre-commit-config.yaml
+exclude .prettierrc.yaml
+exclude dodo.py
+exclude MANIFEST.in
+exclude requirements-dev.txt

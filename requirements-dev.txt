@@ -1,0 +1,9 @@
+# runtime
+tabulate
+# orchestration
+doit
+# format & lint
+pre-commit
+flake8 ==4.0.1
+# test
+pytest

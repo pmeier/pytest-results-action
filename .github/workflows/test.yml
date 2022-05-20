@@ -1,0 +1,25 @@
+name: tests
+
+on:
+  pull_request:
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup development environment
+        uses: ./.github/actions/setup-dev-env
+
+      - name: Run tests
+        shell: bash
+        run: pytest --junit-xml=test-results.xml || true
+
+      - name: Summarize test results
+        if: always()
+        uses: ./
+        with:
+          junit-xml: test-results.xml

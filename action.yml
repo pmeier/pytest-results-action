@@ -1,0 +1,11 @@
+name: pytest-summary-gha
+description: Summary of pytest results
+inputs:
+  junit-xml:
+    description: "path to .xml file with the junit test results"
+    required: true
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.junit-xml }}
