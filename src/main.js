@@ -15,14 +15,30 @@ function addDetailsWithCodeBlock(summary, label, code, lang) {
   );
 }
 
+const htmlEntities = {
+  nbsp: " ",
+  lt: "<",
+  gt: ">",
+  amp: "&",
+  quot: '"',
+  apos: "'",
+};
+const htmlEntityPattern = new RegExp("&([a-z]{2,4});", "g");
+
+function decodeHtmlEntities(text) {
+  return text.replace(htmlEntityPattern, function (match, entity) {
+    console.log(match, entity);
+    return match;
+  });
+}
+
 const main = async () => {
   core.summary.addHeading("Tests");
 
   const parser = new XMLParser({ ignoreAttributes: false });
-  const results = parser.parse(readFileSync(junit_xml, "utf-8")).testsuites
-    .testsuite.testcase;
+  const results = parser.parse(readFileSync(junit_xml, "utf-8"));
 
-  for (const result of results) {
+  for (const result of results.testsuites.testsuite.testcase) {
     if (Object.hasOwn(result, "failure")) {
       addDetailsWithCodeBlock(
         core.summary,
@@ -30,7 +46,7 @@ const main = async () => {
           "code",
           result["@_classname"] + "." + result["@_name"]
         ),
-        core.summary.wrap("code", result.failure["#text"])
+        core.summary.wrap("code", decodeHtmlEntities(result.failure["#text"]))
       );
     }
   }
