@@ -27,8 +27,7 @@ const htmlEntityPattern = new RegExp("&([a-z]{2,4});", "g");
 
 function decodeHtmlEntities(text) {
   return text.replace(htmlEntityPattern, function (match, entity) {
-    console.log(match, entity);
-    return match;
+    return Object.hasOwn(htmlEntities, entity) ? htmlEntities[entity] : match;
   });
 }
 
