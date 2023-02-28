@@ -32,8 +32,6 @@ const main = async () => {
         ),
         core.summary.wrap("code", result.failure["#text"])
       );
-
-      console.log(result.failure["#text"]);
     }
   }
 

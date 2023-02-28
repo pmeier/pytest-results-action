@@ -4858,41 +4858,46 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(2186);
-const {XMLParser} = __nccwpck_require__(2603);
-const {readFileSync} = __nccwpck_require__(7561);
+const { XMLParser } = __nccwpck_require__(2603);
+const { readFileSync } = __nccwpck_require__(7561);
 
-//const junit_xml = core.getInput('junit-xml', { required: true });
-const junit_xml = "test-results.xml";
-process.env.GITHUB_STEP_SUMMARY = "summary.log";
+const junit_xml = core.getInput("junit-xml", { required: true });
 
 function addDetailsWithCodeBlock(summary, label, code, lang) {
-    return summary.addDetails(
-        label,
-        summary.wrap('pre', summary.wrap('code', code.trim()), Object.assign({}, (lang && { lang }))),
+  return summary.addDetails(
+    label,
+    summary.wrap(
+      "pre",
+      summary.wrap("code", code.trim()),
+      Object.assign({}, lang && { lang })
     )
+  );
 }
 
 const main = async () => {
-  core.summary.addHeading('Tests')
+  core.summary.addHeading("Tests");
 
-  const parser = new XMLParser({ignoreAttributes : false});
-  const results = parser.parse(readFileSync(junit_xml, "utf-8")).testsuites.testsuite.testcase
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const results = parser.parse(readFileSync(junit_xml, "utf-8")).testsuites
+    .testsuite.testcase;
 
   for (const result of results) {
     if (Object.hasOwn(result, "failure")) {
-        addDetailsWithCodeBlock(core.summary, core.summary.wrap("code", result["@_classname"] + "." + result["@_name"]),
-        core.summary.wrap("code", result.failure["#text"]),
-        )
-
-        console.log(result.failure["#text"])
+      addDetailsWithCodeBlock(
+        core.summary,
+        core.summary.wrap(
+          "code",
+          result["@_classname"] + "." + result["@_name"]
+        ),
+        core.summary.wrap("code", result.failure["#text"])
+      );
     }
-}
+  }
 
-  await core.summary.write()
+  await core.summary.write();
 };
 
 main();
-
 
 })();
 
