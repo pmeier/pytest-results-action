@@ -5,7 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "build": "ncc build src/main.js",
-    "format": "prettier --write '**/*.ts'"
+    "format": "prettier --write ."
   },
   "repository": {
     "type": "git",
