@@ -1,11 +1,9 @@
-name: pytest-summary-gha
-description: Summary of pytest results
+name: pytest-results-actions
+description: Post pytest results to the workflow summary
 inputs:
   junit-xml:
     description: "path to .xml file with the junit test results"
     required: true
 runs:
-  using: docker
-  image: Dockerfile
-  args:
-    - ${{ inputs.junit-xml }}
+  using: node16
+  main: dist/index.js
