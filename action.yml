@@ -1,4 +1,4 @@
-name: pytest-summary-action
+name: pytest-results-actions
 description: Post pytest results to the workflow summary
 inputs:
   junit-xml:

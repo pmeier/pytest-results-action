@@ -19,7 +19,7 @@ jobs:
         with:
           auto-activate-base: false
           environment-file: environment.yml
-          activate-environment: pytest-summary-action-dev
+          activate-environment: pytest-results-actions-dev
 
       - name: Run tests
         run: pytest --junit-xml=test-results.xml || true
