@@ -1,9 +1,15 @@
 name: pytest-results-actions
 description: Post pytest results to the workflow summary
-inputs:
-  junit-xml:
-    description: "path to .xml file with the junit test results"
-    required: true
+
+branding:
+  icon: bookmark
+  color: red
+
 runs:
   using: node16
   main: dist/index.js
+
+inputs:
+  junit-xml:
+    description: path to .xml file with the junit test results
+    required: true
