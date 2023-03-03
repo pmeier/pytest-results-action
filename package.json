@@ -4,7 +4,7 @@
   "description": "Post pytest results to the workflow summary",
   "main": "src/main.js",
   "scripts": {
-    "build": "ncc build src/main.js",
+    "build": "ncc build --license=LICENSE src/main.js",
     "format": "prettier --write ."
   },
   "repository": {

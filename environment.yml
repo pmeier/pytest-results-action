@@ -1,4 +1,4 @@
-name: pytest-summary-action-dev
+name: pytest-results-action-dev
 channels:
   - conda-forge
 dependencies:
