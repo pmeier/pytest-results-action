@@ -87,4 +87,4 @@ jobs:
       - name: Summarize test results
         uses: ./
         with:
-          junit-xml: test-results.xml
+          path: test-results.xml
