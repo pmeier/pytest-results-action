@@ -13,5 +13,5 @@
   if: always()
   uses: pmeier/pytest-summary-gha@v0.2.0
   with:
-    junit-xml: test-results.xml
+    path: test-results.xml
 ```

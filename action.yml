@@ -10,6 +10,12 @@ runs:
   main: dist/index.js
 
 inputs:
-  junit-xml:
-    description: path to .xml file with the junit test results
+  path:
+    description: |
+      A list of JUnit XML files, directories containing the former, and wildcard 
+      patterns to process. See @actions/glob for supported patterns.
     required: true
+  fail-on-empty:
+    description: Fail the workflow if no JUnit XML was found
+    required: false
+    default: true
