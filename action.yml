@@ -15,6 +15,16 @@ inputs:
       A list of JUnit XML files, directories containing the former, and wildcard 
       patterns to process. See @actions/glob for supported patterns.
     required: true
+  summary:
+    description: Add a summary of the results at the top of the report
+    required: false
+    default: true
+  display-options:
+    description: |
+      Select which results should be included in the report. 
+      Follows the same syntax as `pytest -r`
+    required: false
+    default: fEX
   fail-on-empty:
     description: Fail the workflow if no JUnit XML was found
     required: false
