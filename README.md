@@ -25,15 +25,26 @@ Since failing tests mean a non-zero exit code of `pytest`, `if: always()` needs 
 
 - name: Surface failing tests
   if: always()
-  uses: pmeier/pytest-summary-gha@v0.3.0
+  uses: pmeier/pytest-summary-gha@main
   with:
-    # A list of JUnit XML files, directories containing the former, and wildcard 
-    # patterns to process. See @actions/glob for supported patterns.
+    # A list of JUnit XML files, directories containing the former, and wildcard
+    # patterns to process.
+    # See @actions/glob for supported patterns.
     path: test-results.xml
-    
+
+    # Add a summary of the results at the top of the report
+    # Default: true
+    summary: true
+
+    # Select which results should be included in the report.
+    # Follows the same syntax as
+    # `pytest -r`
+    # Default: fEX
+    display-options: fEX
+
     # Fail the workflow if no JUnit XML was found.
-    # Default: true 
+    # Default: true
     fail-on-empty: true
 ```
 
-The failed tests will be posted to the workflow summary.
+The report will be posted to the workflow summary.

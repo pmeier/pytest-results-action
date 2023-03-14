@@ -7164,6 +7164,289 @@ exports["default"] = _default;
 
 /***/ }),
 
+/***/ 8693:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const fs = (__nccwpck_require__(7147).promises);
+
+const core = __nccwpck_require__(2186);
+const glob = __nccwpck_require__(8090);
+
+const { XMLParser } = __nccwpck_require__(2603);
+
+module.exports = { parseXmlFiles };
+
+async function* collectXmlFiles(path) {
+  const globber = await glob.create(path, {
+    implicitDescendants: false,
+  });
+  const paths = await globber.glob();
+
+  for (const file_or_dir of paths) {
+    var stats;
+    try {
+      stats = await fs.stat(file_or_dir);
+    } catch (error) {
+      core.setFailed(`Action failed with error ${error}`);
+    }
+    if (stats.isFile()) {
+      yield file_or_dir;
+    } else {
+      const globber = await glob.create(file_or_dir + "/**/*.xml", {
+        implicitDescendants: false,
+      });
+      for await (const file of globber.glob()) {
+        yield file;
+      }
+    }
+  }
+}
+
+async function* parseXmlFiles(path) {
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+    processEntities: false,
+  });
+
+  for await (const file of collectXmlFiles(path)) {
+    yield parser.parse(await fs.readFile(file, "utf-8"));
+  }
+}
+
+
+/***/ }),
+
+/***/ 3188:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const fs = (__nccwpck_require__(7147).promises);
+
+const gha = __nccwpck_require__(2186);
+
+const { zip, prettyDuration } = __nccwpck_require__(1608);
+
+module.exports = { postResults };
+
+// FIXME: refactor
+const resultTypes = [
+  "passed",
+  "skipped",
+  "xfailed",
+  "failed",
+  "xpassed",
+  "error",
+];
+const resultTypesWithEmoji = zip(
+  resultTypes,
+  ["green", "yellow", "yellow", "red", "red", , "red"].map(
+    (color) => `:${color}_circle:`
+  )
+);
+
+async function postResults(xmls, summary, displayOptions) {
+  const results = await extractResults(xmls);
+  if (results.total_tests == 0) {
+    return;
+  }
+
+  addResults(results, summary, displayOptions);
+  await gha.summary.write();
+}
+
+async function extractResults(xmls) {
+  const results = {
+    total_time: 0.0,
+    total_tests: 0,
+    // FIXME: incorporate from above
+    passed: [],
+    failed: [],
+    skipped: [],
+    xfailed: [],
+    xpassed: [],
+    error: [],
+  };
+
+  for await (const xml of xmls) {
+    const testSuite = xml.testsuites.testsuite;
+    results.total_time += parseFloat(testSuite["@_time"]);
+
+    for (const result of testSuite.testcase) {
+      var resultTypeArray;
+      var msg;
+
+      if (Object.hasOwn(result, "failure")) {
+        var msg = result.failure["#text"];
+        const parts = msg.split("[XPASS(strict)] ");
+        if (parts.length == 2) {
+          resultTypeArray = results.xpassed;
+          msg = parts[1];
+        } else {
+          resultTypeArray = results.failed;
+        }
+      } else if (Object.hasOwn(result, "skipped")) {
+        switch (result.skipped["@_type"]) {
+          case "pytest.skip":
+            resultTypeArray = results.skipped;
+            break;
+          case "pytest.xfail":
+            resultTypeArray = results.xfailed;
+            break;
+          default:
+          // FIXME: throw an error here
+        }
+        msg = result.skipped["@_message"];
+      } else if (Object.hasOwn(result, "error")) {
+        resultTypeArray = results.error;
+        // FIXME: do we need to integrate the message here?
+        msg = result.error["#text"];
+      } else {
+        // This could also be an xpass when strict=False is set. Unfortunately, there is no way to differentiate here
+        // See FIXME
+        resultTypeArray = results.passed;
+        msg = undefined;
+      }
+
+      resultTypeArray.push({
+        id: result["@_classname"] + "." + result["@_name"],
+        msg: msg,
+      });
+      results.total_tests += 1;
+    }
+  }
+
+  return results;
+}
+
+async function addResults(results, summary, displayOptions) {
+  gha.summary.addHeading("Tests");
+
+  if (summary) {
+    addSummary(results);
+  }
+
+  for (resultType of getResultTypesFromDisplayOptions(displayOptions)) {
+    gha.summary.addHeading(resultType, 2);
+
+    for (const result of results[resultType]) {
+      // FIXME: check if message is undefined otherwise, just post this as regular line
+      addDetailsWithCodeBlock(
+        gha.summary,
+        gha.summary.wrap("code", result.id),
+        result.msg
+      );
+    }
+  }
+}
+
+function addSummary(results) {
+  gha.summary.addRaw(
+    `Ran ${results.total_tests} tests in ${prettyDuration(results.total_time)}`,
+    true
+  );
+
+  var rows = [["Result", "Amount"]];
+  for (const [resultType, emoji] of resultTypesWithEmoji) {
+    const abs_amount = results[resultType].length;
+    const rel_amount = abs_amount / results.total_tests;
+    rows.push([
+      `${emoji} ${resultType}`,
+      `${abs_amount} (${(rel_amount * 100).toFixed(1)}%)`,
+    ]);
+  }
+  gha.summary.addTable(rows);
+}
+
+function getResultTypesFromDisplayOptions(displayOptions) {
+  // 'N' resets the list of chars passed to the '-r' option of pytest. Thus, we only
+  // care about anything after the last occurrence
+  const displayChars = displayOptions.split("N").pop();
+
+  console.log(displayChars);
+
+  if (displayChars.toLowerCase().includes("a")) {
+    return resultTypes;
+  }
+
+  var displayTypes = new Set();
+  for (const [displayChar, displayType] of [
+    ["f", "failed"],
+    ["E", "error"],
+    ["s", "skipped"],
+    ["x", "xfailed"],
+    ["X", "xpassed"],
+    ["p", "passed"],
+    ["P", "passed"],
+  ]) {
+    if (displayOptions.includes(displayChar)) {
+      displayTypes.add(displayType);
+    }
+  }
+
+  return [...displayTypes];
+}
+
+function addDetailsWithCodeBlock(summary, label, code) {
+  return summary.addDetails(
+    label,
+    "\n\n" + summary.wrap("pre", summary.wrap("code", code))
+  );
+}
+
+
+/***/ }),
+
+/***/ 1608:
+/***/ ((module) => {
+
+module.exports = { checkAsyncGeneratorEmpty, prettyDuration, zip };
+
+async function* prefixAsyncGenerator(prefix, gen) {
+  yield prefix;
+  for await (const item of gen) {
+    yield item;
+  }
+}
+
+async function checkAsyncGeneratorEmpty(gen) {
+  const { done, value } = await gen.next();
+  var isEmpty;
+  var out_gen;
+  if (done) {
+    isEmpty = true;
+    out_gen = gen;
+  } else {
+    isEmpty = false;
+    out_gen = prefixAsyncGenerator(value, gen);
+  }
+
+  return { isEmpty: isEmpty, generator: out_gen };
+}
+
+function prettyDuration(seconds) {
+  var seconds = Math.ceil(seconds);
+
+  var minutes = Math.floor(seconds / 60);
+  if (minutes == 0) {
+    return `${seconds}s`;
+  }
+  seconds = seconds % 60;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours == 0) {
+    return `${minutes}m ${seconds}s`;
+  }
+  minutes = minutes % 60;
+
+  return `${hours}h ${minutes}m ${seconds}s`;
+}
+
+function zip(a, b) {
+  return a.map((obj, idx) => [obj, b[idx]]);
+}
+
+
+/***/ }),
+
 /***/ 9491:
 /***/ ((module) => {
 
@@ -7301,90 +7584,49 @@ module.exports = require("util");
 var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
-const fs = (__nccwpck_require__(7147).promises);
+const gha = __nccwpck_require__(2186);
+const { checkAsyncGeneratorEmpty } = __nccwpck_require__(1608);
+const { parseXmlFiles } = __nccwpck_require__(8693);
+const { postResults } = __nccwpck_require__(3188);
 
-const core = __nccwpck_require__(2186);
-const glob = __nccwpck_require__(8090);
+async function main() {
+  const inputs = getInputs();
 
-const { XMLParser } = __nccwpck_require__(2603);
+  var xmls = parseXmlFiles(inputs.path);
 
-const main = async () => {
-  const path = core.getInput("path", { required: true });
-  const failOnEmpty = core.getBooleanInput("fail-on-empty", {
-    required: false,
-  });
-
-  const files = await getFiles(path);
-  if (files.length == 0 && failOnEmpty) {
-    core.setFailed(
+  const { isEmpty, generator } = await checkAsyncGeneratorEmpty(xmls);
+  if (isEmpty && inputs.failOnEmpty) {
+    gha.setFailed(
       "No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case"
     );
   }
+  xmls = generator;
 
-  await postResults(files);
-};
+  await postResults(xmls, inputs.summary, inputs.displayOptions);
+}
+
+function getInputs() {
+  process.env.GITHUB_STEP_SUMMARY = "summary.md";
+  return {
+    path: "foo.xml",
+    summary: true,
+    displayOptions: "fEX",
+    failOnEmpty: true,
+  };
+  //FIXME: add debugs for inputs
+  return {
+    path: gha.getInput("path", { required: true }),
+    summary: gha.getBooleanInput("summary", {
+      required: false,
+    }),
+    displayOptions: gha.getInput("display-options", { required: false }),
+    failOnEmpty: gha.getBooleanInput("fail-on-empty", {
+      required: false,
+    }),
+  };
+}
 
 main();
-
-async function getFiles(path) {
-  const globber = await glob.create(path, {
-    implicitDescendants: false,
-  });
-  const paths = await globber.glob();
-
-  var files = [];
-  for (const file_or_dir of paths) {
-    var stats;
-    try {
-      stats = await fs.stat(file_or_dir);
-    } catch (error) {
-      core.setFailed(`Action failed with error ${error}`);
-    }
-    if (stats.isFile()) {
-      files.push(file_or_dir);
-    } else {
-      const globber = await glob.create(file_or_dir + "/**/*.xml", {
-        implicitDescendants: false,
-      });
-      files.push(...(await globber.glob()));
-    }
-  }
-  return files;
-}
-
-async function postResults(files) {
-  core.summary.addHeading("Tests");
-
-  const parser = new XMLParser({
-    ignoreAttributes: false,
-    processEntities: false,
-  });
-  for (const file of files) {
-    const results = parser.parse(await fs.readFile(file, "utf-8"));
-
-    for (const result of results.testsuites.testsuite.testcase) {
-      if (Object.hasOwn(result, "failure")) {
-        addDetailsWithCodeBlock(
-          core.summary,
-          core.summary.wrap(
-            "code",
-            result["@_classname"] + "." + result["@_name"]
-          ),
-          result.failure["#text"]
-        );
-      }
-    }
-  }
-
-  return core.summary.write();
-}
-
-function addDetailsWithCodeBlock(summary, label, code) {
-  return summary.addDetails(
-    label,
-    "\n\n" + summary.wrap("pre", summary.wrap("code", code))
-  );
-}
 
 })();
 
