@@ -20,14 +20,6 @@ async function main() {
 }
 
 function getInputs() {
-  process.env.GITHUB_STEP_SUMMARY = "summary.md";
-  return {
-    path: "foo.xml",
-    summary: true,
-    displayOptions: "fEX",
-    failOnEmpty: true,
-  };
-  //FIXME: add debugs for inputs
   return {
     path: gha.getInput("path", { required: true }),
     summary: gha.getBooleanInput("summary", {
