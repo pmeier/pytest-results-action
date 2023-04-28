@@ -25,7 +25,7 @@ Since failing tests mean a non-zero exit code of `pytest`, `if: always()` needs 
 
 - name: Surface failing tests
   if: always()
-  uses: pmeier/pytest-summary-gha@main
+  uses: pmeier/pytest-results-action@main
   with:
     # A list of JUnit XML files, directories containing the former, and wildcard
     # patterns to process.
