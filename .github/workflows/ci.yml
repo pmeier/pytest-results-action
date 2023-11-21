@@ -34,7 +34,7 @@ jobs:
       - name: Check format
         run: |
           if [ "$(git diff | wc -l)" -gt "0" ]; then
-            echo "Code format is not correct. Please run `npm run format` and commit the results."
+            echo "Code format is not correct. Please run \`npm run format\` and commit the results."
             exit 1
           fi
 
@@ -64,7 +64,7 @@ jobs:
       - name: Check synchronicity
         run: |
           if [ "$(git diff | wc -l)" -gt "0" ]; then
-            echo "dist/ is out of sync with src/. Please run `npm run build` and commit the results."
+            echo "dist/ is out of sync with src/. Please run \`npm run build\` and commit the results."
             exit 1
           fi
 
