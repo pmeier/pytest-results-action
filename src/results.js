@@ -49,7 +49,8 @@ async function extractResults(xmls) {
     const testSuite = xml.testsuites.testsuite;
     results.total_time += parseFloat(testSuite["@_time"]);
 
-    for (const result of testSuite.testcase) {
+    const testCases = testSuite.testcase instanceof Array ? testSuite.testcase : [testSuite.testcase];
+    for (const result of testCases) {
       var resultTypeArray;
       var msg;
 
