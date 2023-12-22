@@ -16,7 +16,7 @@ async function main() {
   }
   xmls = generator;
 
-  await postResults(xmls, inputs.summary, inputs.displayOptions);
+  await postResults(xmls, inputs);
 }
 
 function getInputs() {
@@ -29,6 +29,7 @@ function getInputs() {
     failOnEmpty: gha.getBooleanInput("fail-on-empty", {
       required: false,
     }),
+    title: gha.getInput("title", { required: false }),
   };
 }
 

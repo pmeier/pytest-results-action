@@ -32,19 +32,19 @@ Since failing tests mean a non-zero exit code of `pytest`, `if: always()` needs 
     # See @actions/glob for supported patterns.
     path: test-results.xml
 
-    # Add a summary of the results at the top of the report
-    # Default: true
+    # (Optional) Add a summary of the results at the top of the report
     summary: true
 
-    # Select which results should be included in the report.
+    # (Optional) Select which results should be included in the report.
     # Follows the same syntax as
     # `pytest -r`
-    # Default: fEX
     display-options: fEX
 
-    # Fail the workflow if no JUnit XML was found.
-    # Default: true
+    # (Optional) Fail the workflow if no JUnit XML was found.
     fail-on-empty: true
+
+    # (Optional) Title of the test results section in the workflow summary
+    title: Test results
 ```
 
 The report will be posted to the workflow summary.

@@ -7243,13 +7243,13 @@ const resultTypesWithEmoji = zip(
   )
 );
 
-async function postResults(xmls, summary, displayOptions) {
+async function postResults(xmls, inputs) {
   const results = await extractResults(xmls);
   if (results.total_tests == 0) {
     return;
   }
 
-  addResults(results, summary, displayOptions);
+  addResults(results, inputs.title, inputs.summary, inputs.displayOptions);
   await gha.summary.write();
 }
 
@@ -7321,8 +7321,8 @@ async function extractResults(xmls) {
   return results;
 }
 
-async function addResults(results, summary, displayOptions) {
-  gha.summary.addHeading("Tests");
+async function addResults(results, title, summary, displayOptions) {
+  gha.summary.addHeading(title);
 
   if (summary) {
     addSummary(results);
@@ -7606,7 +7606,7 @@ async function main() {
   }
   xmls = generator;
 
-  await postResults(xmls, inputs.summary, inputs.displayOptions);
+  await postResults(xmls, inputs);
 }
 
 function getInputs() {
@@ -7619,6 +7619,7 @@ function getInputs() {
     failOnEmpty: gha.getBooleanInput("fail-on-empty", {
       required: false,
     }),
+    title: gha.getInput("title", { required: false }),
   };
 }
 
