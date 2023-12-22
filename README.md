@@ -36,8 +36,7 @@ Since failing tests mean a non-zero exit code of `pytest`, `if: always()` needs 
     summary: true
 
     # (Optional) Select which results should be included in the report.
-    # Follows the same syntax as
-    # `pytest -r`
+    # Follows the same syntax as `pytest -r`
     display-options: fEX
 
     # (Optional) Fail the workflow if no JUnit XML was found.
