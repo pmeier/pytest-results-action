@@ -29,3 +29,7 @@ inputs:
     description: Fail the workflow if no JUnit XML was found
     required: false
     default: true
+  title:
+    description: Title of the test results section in the workflow summary
+    required: false
+    default: Test results
