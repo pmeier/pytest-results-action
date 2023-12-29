@@ -7329,9 +7329,14 @@ async function addResults(results, title, summary, displayOptions) {
   }
 
   for (resultType of getResultTypesFromDisplayOptions(displayOptions)) {
+    const results_for_type = results[resultType];
+    if (!results_for_type.length) {
+      continue;
+    }
+
     gha.summary.addHeading(resultType, 2);
 
-    for (const result of results[resultType]) {
+    for (const result of results_for_type) {
       // FIXME: check if message is undefined otherwise, just post this as regular line
       addDetailsWithCodeBlock(
         gha.summary,
