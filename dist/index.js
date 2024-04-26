@@ -7294,54 +7294,56 @@ async function extractResults(xmls) {
   };
 
   for await (const xml of xmls) {
-    const testSuite = xml.testsuites.testsuite;
-    results.total_time += parseFloat(testSuite["@_time"]);
+    var testSuites = xml.testsuites.testsuite;
+    testSuites = testSuites instanceof Array ? testSuites : [testSuites];
 
-    const testCases =
-      testSuite.testcase instanceof Array
-        ? testSuite.testcase
-        : [testSuite.testcase];
-    for (const result of testCases) {
-      var resultTypeArray;
-      var msg;
+    for (var testSuite of testSuites) {
+      results.total_time += parseFloat(testSuite["@_time"]);
 
-      if (Object.hasOwn(result, "failure")) {
-        var msg = result.failure["#text"];
-        const parts = msg.split("[XPASS(strict)] ");
-        if (parts.length == 2) {
-          resultTypeArray = results.xpassed;
-          msg = parts[1];
+      var testCases = testSuite.testcase;
+      testCases = testCases instanceof Array ? testCases : [testCases];
+      for (const result of testCases) {
+        var resultTypeArray;
+        var msg;
+
+        if (Object.hasOwn(result, "failure")) {
+          var msg = result.failure["#text"];
+          const parts = msg.split("[XPASS(strict)] ");
+          if (parts.length == 2) {
+            resultTypeArray = results.xpassed;
+            msg = parts[1];
+          } else {
+            resultTypeArray = results.failed;
+          }
+        } else if (Object.hasOwn(result, "skipped")) {
+          switch (result.skipped["@_type"]) {
+            case "pytest.skip":
+              resultTypeArray = results.skipped;
+              break;
+            case "pytest.xfail":
+              resultTypeArray = results.xfailed;
+              break;
+            default:
+            // FIXME: throw an error here
+          }
+          msg = result.skipped["@_message"];
+        } else if (Object.hasOwn(result, "error")) {
+          resultTypeArray = results.error;
+          // FIXME: do we need to integrate the message here?
+          msg = result.error["#text"];
         } else {
-          resultTypeArray = results.failed;
+          // This could also be an xpass when strict=False is set. Unfortunately, there is no way to differentiate here
+          // See FIXME
+          resultTypeArray = results.passed;
+          msg = undefined;
         }
-      } else if (Object.hasOwn(result, "skipped")) {
-        switch (result.skipped["@_type"]) {
-          case "pytest.skip":
-            resultTypeArray = results.skipped;
-            break;
-          case "pytest.xfail":
-            resultTypeArray = results.xfailed;
-            break;
-          default:
-          // FIXME: throw an error here
-        }
-        msg = result.skipped["@_message"];
-      } else if (Object.hasOwn(result, "error")) {
-        resultTypeArray = results.error;
-        // FIXME: do we need to integrate the message here?
-        msg = result.error["#text"];
-      } else {
-        // This could also be an xpass when strict=False is set. Unfortunately, there is no way to differentiate here
-        // See FIXME
-        resultTypeArray = results.passed;
-        msg = undefined;
-      }
 
-      resultTypeArray.push({
-        id: result["@_classname"] + "." + result["@_name"],
-        msg: msg,
-      });
-      results.total_tests += 1;
+        resultTypeArray.push({
+          id: result["@_classname"] + "." + result["@_name"],
+          msg: msg,
+        });
+        results.total_tests += 1;
+      }
     }
   }
 
