@@ -1,11 +1,11 @@
+module.exports = { main };
+
 const gha = require("@actions/core");
 const { checkAsyncGeneratorEmpty } = require("./utils");
 const { parseXmlFiles } = require("./io");
 const { postResults } = require("./results");
 
-async function main() {
-  const inputs = getInputs();
-
+async function main(inputs) {
   var xmls = parseXmlFiles(inputs.path);
 
   const { isEmpty, generator } = await checkAsyncGeneratorEmpty(xmls);
@@ -18,19 +18,3 @@ async function main() {
 
   await postResults(xmls, inputs);
 }
-
-function getInputs() {
-  return {
-    path: gha.getInput("path", { required: true }),
-    summary: gha.getBooleanInput("summary", {
-      required: false,
-    }),
-    displayOptions: gha.getInput("display-options", { required: false }),
-    failOnEmpty: gha.getBooleanInput("fail-on-empty", {
-      required: false,
-    }),
-    title: gha.getInput("title", { required: false }),
-  };
-}
-
-main();
