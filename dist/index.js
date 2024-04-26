@@ -7216,6 +7216,33 @@ async function* parseXmlFiles(path) {
 
 /***/ }),
 
+/***/ 1713:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+module.exports = { main };
+
+const gha = __nccwpck_require__(2186);
+const { checkAsyncGeneratorEmpty } = __nccwpck_require__(1608);
+const { parseXmlFiles } = __nccwpck_require__(8693);
+const { postResults } = __nccwpck_require__(3188);
+
+async function main(inputs) {
+  var xmls = parseXmlFiles(inputs.path);
+
+  const { isEmpty, generator } = await checkAsyncGeneratorEmpty(xmls);
+  if (isEmpty && inputs.failOnEmpty) {
+    gha.setFailed(
+      "No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case"
+    );
+  }
+  xmls = generator;
+
+  await postResults(xmls, inputs);
+}
+
+
+/***/ }),
+
 /***/ 3188:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -7594,24 +7621,12 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const gha = __nccwpck_require__(2186);
-const { checkAsyncGeneratorEmpty } = __nccwpck_require__(1608);
-const { parseXmlFiles } = __nccwpck_require__(8693);
-const { postResults } = __nccwpck_require__(3188);
 
-async function main() {
+const { main } = __nccwpck_require__(1713);
+
+async function entrypoint() {
   const inputs = getInputs();
-
-  var xmls = parseXmlFiles(inputs.path);
-
-  const { isEmpty, generator } = await checkAsyncGeneratorEmpty(xmls);
-  if (isEmpty && inputs.failOnEmpty) {
-    gha.setFailed(
-      "No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case"
-    );
-  }
-  xmls = generator;
-
-  await postResults(xmls, inputs);
+  await main(inputs);
 }
 
 function getInputs() {
@@ -7628,7 +7643,7 @@ function getInputs() {
   };
 }
 
-main();
+entrypoint();
 
 })();
 
