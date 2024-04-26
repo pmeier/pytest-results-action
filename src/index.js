@@ -1,3 +1,5 @@
+const gha = require("@actions/core");
+
 const { main } = require("./main");
 
 async function entrypoint() {
