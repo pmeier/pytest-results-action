@@ -7366,12 +7366,15 @@ async function addResults(results, title, summary, displayOptions) {
     gha.summary.addHeading(resultType, 2);
 
     for (const result of results_for_type) {
-      // FIXME: check if message is undefined otherwise, just post this as regular line
-      addDetailsWithCodeBlock(
-        gha.summary,
-        gha.summary.wrap("code", result.id),
-        result.msg
-      );
+      if (result.msg) {
+        addDetailsWithCodeBlock(
+          gha.summary,
+          gha.summary.wrap("code", result.id),
+          result.msg
+        );
+      } else {
+        gha.summary.addRaw(`\n:heavy_check_mark: ${result.id}`, true);
+      }
     }
   }
 }
