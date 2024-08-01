@@ -7265,7 +7265,7 @@ const resultTypes = [
 ];
 const resultTypesWithEmoji = zip(
   resultTypes,
-  ["green", "yellow", "yellow", "red", "red", , "red"].map(
+  ["green", "yellow", "yellow", "red", "red", "red"].map(
     (color) => `:${color}_circle:`
   )
 );
