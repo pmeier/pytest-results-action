@@ -46,4 +46,9 @@ Since failing tests mean a non-zero exit code of `pytest`, `if: always()` needs 
     title: Test results
 ```
 
-The report will be posted to the workflow summary.
+The report will be posted to the workflow summary:
+
+<picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/pmeier/pytest-results-action/main/images/summary-report-dark.png">
+    <img src="https://raw.githubusercontent.com/pmeier/pytest-results-action/main/images/summary-report-light.png" alt="Example of report posted to the workflow summary by pytest-results-action. Under the title is a table that details the absolute and relative number of passed, skipped, xfailed, failed, xpassed, and errored tests. Below the table is a section for failed, errored, and xpassed tests. Each section includes the names of the respective test as well as the corresponding message. Only the details of the failed tests are visible.">
+</picture>
