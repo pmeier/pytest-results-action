@@ -60,10 +60,6 @@ jobs:
             exit 1
           fi
 
-      - name: Display diff
-        if: ${{ failure() && steps.sync.outcome == 'failure' }}
-        run: git diff
-
   integration-smoke-test:
     runs-on: ubuntu-latest
 
