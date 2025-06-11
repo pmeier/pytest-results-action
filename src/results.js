@@ -68,15 +68,10 @@ async function extractResults(xmls) {
             resultTypeArray = results.failed;
           }
         } else if (Object.hasOwn(result, "skipped")) {
-          switch (result.skipped["@_type"]) {
-            case "pytest.skip":
-              resultTypeArray = results.skipped;
-              break;
-            case "pytest.xfail":
-              resultTypeArray = results.xfailed;
-              break;
-            default:
-            // FIXME: throw an error here
+          if (result.skipped["@_type"] == "pytest.xfail") {
+            resultTypeArray = results.xfailed;
+          } else {
+            resultTypeArray = results.skipped;
           }
           msg = result.skipped["@_message"];
         } else if (Object.hasOwn(result, "error")) {
