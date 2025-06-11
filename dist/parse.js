@@ -1,6 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TestType = void 0;
 exports.extractResults = extractResults;
+var TestType;
+(function (TestType) {
+    TestType["Passed"] = "passed";
+    TestType["Skipped"] = "skipped";
+    TestType["XFailed"] = "xfailed";
+    TestType["Failed"] = "failed";
+    TestType["XPassed"] = "xpassed";
+    TestType["Error"] = "error";
+})(TestType || (exports.TestType = TestType = {}));
 function extractResults(xmls) {
     const results = {
         total_time: 0.0,
@@ -24,29 +34,29 @@ function extractResults(xmls) {
                     const failureMsg = result.failure["#text"];
                     const parts = failureMsg.split("[XPASS(strict)] ");
                     if (parts.length === 2) {
-                        type = "xpassed";
+                        type = TestType.XPassed;
                         msg = parts[1];
                     }
                     else {
-                        type = "failed";
+                        type = TestType.Failed;
                         msg = failureMsg;
                     }
                 }
                 else if ("skipped" in result) {
                     if (result.skipped["@_type"] === "pytest.xfail") {
-                        type = "xfailed";
+                        type = TestType.XFailed;
                     }
                     else {
-                        type = "skipped";
+                        type = TestType.Skipped;
                     }
                     msg = result.skipped["@_message"];
                 }
                 else if ("error" in result) {
-                    type = "error";
+                    type = TestType.Error;
                     msg = result.error["#text"];
                 }
                 else {
-                    type = "passed";
+                    type = TestType.Passed;
                     msg = undefined;
                 }
                 results.tests.push({

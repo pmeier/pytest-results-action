@@ -1,10 +1,11 @@
-export type TestType =
-  | "passed"
-  | "skipped"
-  | "xfailed"
-  | "failed"
-  | "xpassed"
-  | "error";
+export enum TestType {
+  Passed = "passed",
+  Skipped = "skipped",
+  XFailed = "xfailed",
+  Failed = "failed",
+  XPassed = "xpassed",
+  Error = "error",
+}
 
 export interface TestResult {
   id: string;
@@ -45,24 +46,24 @@ export function extractResults(xmls: any[]): TestResults {
           const failureMsg = result.failure["#text"];
           const parts = failureMsg.split("[XPASS(strict)] ");
           if (parts.length === 2) {
-            type = "xpassed";
+            type = TestType.XPassed;
             msg = parts[1];
           } else {
-            type = "failed";
+            type = TestType.Failed;
             msg = failureMsg;
           }
         } else if ("skipped" in result) {
           if (result.skipped["@_type"] === "pytest.xfail") {
-            type = "xfailed";
+            type = TestType.XFailed;
           } else {
-            type = "skipped";
+            type = TestType.Skipped;
           }
           msg = result.skipped["@_message"];
         } else if ("error" in result) {
-          type = "error";
+          type = TestType.Error;
           msg = result.error["#text"];
         } else {
-          type = "passed";
+          type = TestType.Passed;
           msg = undefined;
         }
 

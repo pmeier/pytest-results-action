@@ -72,5 +72,5 @@ async function parseXmlFiles(path) {
         processEntities: false,
     });
     const files = await collectXmlFiles(path);
-    return Promise.all(files.map(file => fs_1.promises.readFile(file, "utf-8").then(content => parser.parse(content))));
+    return Promise.all(files.map((file) => fs_1.promises.readFile(file, "utf-8").then((content) => parser.parse(content))));
 }

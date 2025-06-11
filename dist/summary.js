@@ -36,13 +36,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.postResults = postResults;
 const gha = __importStar(require("@actions/core"));
 const utils_1 = require("./utils");
+const parse_1 = require("./parse");
 const resultTypes = [
-    "passed",
-    "skipped",
-    "xfailed",
-    "failed",
-    "xpassed",
-    "error",
+    parse_1.TestType.Passed,
+    parse_1.TestType.Skipped,
+    parse_1.TestType.XFailed,
+    parse_1.TestType.Failed,
+    parse_1.TestType.XPassed,
+    parse_1.TestType.Error,
 ];
 const resultTypesWithEmoji = (0, utils_1.zip)([...resultTypes], ["green", "yellow", "yellow", "red", "red", "red"].map((color) => `:${color}_circle:`));
 async function postResults(results, inputs) {
@@ -50,12 +51,12 @@ async function postResults(results, inputs) {
     const oldFormatResults = {
         total_time: results.total_time,
         total_tests: results.total_tests,
-        passed: results.tests.filter(t => t.type === "passed"),
-        failed: results.tests.filter(t => t.type === "failed"),
-        skipped: results.tests.filter(t => t.type === "skipped"),
-        xfailed: results.tests.filter(t => t.type === "xfailed"),
-        xpassed: results.tests.filter(t => t.type === "xpassed"),
-        error: results.tests.filter(t => t.type === "error"),
+        passed: results.tests.filter((t) => t.type === parse_1.TestType.Passed),
+        failed: results.tests.filter((t) => t.type === parse_1.TestType.Failed),
+        skipped: results.tests.filter((t) => t.type === parse_1.TestType.Skipped),
+        xfailed: results.tests.filter((t) => t.type === parse_1.TestType.XFailed),
+        xpassed: results.tests.filter((t) => t.type === parse_1.TestType.XPassed),
+        error: results.tests.filter((t) => t.type === parse_1.TestType.Error),
     };
     addResults(oldFormatResults, inputs.title, inputs.summary, inputs.displayOptions);
     await gha.summary.write();
@@ -106,13 +107,13 @@ function getResultTypesFromDisplayOptions(displayOptions) {
     }
     const displayTypes = new Set();
     for (const [displayChar, displayType] of [
-        ["f", "failed"],
-        ["E", "error"],
-        ["s", "skipped"],
-        ["x", "xfailed"],
-        ["X", "xpassed"],
-        ["p", "passed"],
-        ["P", "passed"],
+        ["f", parse_1.TestType.Failed],
+        ["E", parse_1.TestType.Error],
+        ["s", parse_1.TestType.Skipped],
+        ["x", parse_1.TestType.XFailed],
+        ["X", parse_1.TestType.XPassed],
+        ["p", parse_1.TestType.Passed],
+        ["P", parse_1.TestType.Passed],
     ]) {
         if (displayOptions.includes(displayChar)) {
             displayTypes.add(displayType);

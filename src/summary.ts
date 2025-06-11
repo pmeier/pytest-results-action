@@ -2,14 +2,15 @@ import * as gha from "@actions/core";
 import { zip, prettyDuration } from "./utils";
 import type { ActionInputs } from "./main";
 import type { TestResults, TestResult } from "./parse";
+import { TestType } from "./parse";
 
 const resultTypes = [
-  "passed",
-  "skipped",
-  "xfailed",
-  "failed",
-  "xpassed",
-  "error",
+  TestType.Passed,
+  TestType.Skipped,
+  TestType.XFailed,
+  TestType.Failed,
+  TestType.XPassed,
+  TestType.Error,
 ] as const;
 
 type ResultType = (typeof resultTypes)[number];
@@ -41,12 +42,12 @@ export async function postResults(
   const oldFormatResults: OldFormatTestResults = {
     total_time: results.total_time,
     total_tests: results.total_tests,
-    passed: results.tests.filter((t) => t.type === "passed"),
-    failed: results.tests.filter((t) => t.type === "failed"),
-    skipped: results.tests.filter((t) => t.type === "skipped"),
-    xfailed: results.tests.filter((t) => t.type === "xfailed"),
-    xpassed: results.tests.filter((t) => t.type === "xpassed"),
-    error: results.tests.filter((t) => t.type === "error"),
+    passed: results.tests.filter((t) => t.type === TestType.Passed),
+    failed: results.tests.filter((t) => t.type === TestType.Failed),
+    skipped: results.tests.filter((t) => t.type === TestType.Skipped),
+    xfailed: results.tests.filter((t) => t.type === TestType.XFailed),
+    xpassed: results.tests.filter((t) => t.type === TestType.XPassed),
+    error: results.tests.filter((t) => t.type === TestType.Error),
   };
 
   addResults(
@@ -125,13 +126,13 @@ function getResultTypesFromDisplayOptions(
 
   const displayTypes = new Set<ResultType>();
   for (const [displayChar, displayType] of [
-    ["f", "failed"],
-    ["E", "error"],
-    ["s", "skipped"],
-    ["x", "xfailed"],
-    ["X", "xpassed"],
-    ["p", "passed"],
-    ["P", "passed"],
+    ["f", TestType.Failed],
+    ["E", TestType.Error],
+    ["s", TestType.Skipped],
+    ["x", TestType.XFailed],
+    ["X", TestType.XPassed],
+    ["p", TestType.Passed],
+    ["P", TestType.Passed],
   ] as const) {
     if (displayOptions.includes(displayChar)) {
       displayTypes.add(displayType);

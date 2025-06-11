@@ -142,7 +142,7 @@ async function parseXmlFiles(path) {
         processEntities: false,
     });
     const files = await collectXmlFiles(path);
-    return Promise.all(files.map(file => fs_1.promises.readFile(file, "utf-8").then(content => parser.parse(content))));
+    return Promise.all(files.map((file) => fs_1.promises.readFile(file, "utf-8").then((content) => parser.parse(content))));
 }
 
 
@@ -214,7 +214,17 @@ async function main(inputs) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TestType = void 0;
 exports.extractResults = extractResults;
+var TestType;
+(function (TestType) {
+    TestType["Passed"] = "passed";
+    TestType["Skipped"] = "skipped";
+    TestType["XFailed"] = "xfailed";
+    TestType["Failed"] = "failed";
+    TestType["XPassed"] = "xpassed";
+    TestType["Error"] = "error";
+})(TestType || (exports.TestType = TestType = {}));
 function extractResults(xmls) {
     const results = {
         total_time: 0.0,
@@ -238,29 +248,29 @@ function extractResults(xmls) {
                     const failureMsg = result.failure["#text"];
                     const parts = failureMsg.split("[XPASS(strict)] ");
                     if (parts.length === 2) {
-                        type = "xpassed";
+                        type = TestType.XPassed;
                         msg = parts[1];
                     }
                     else {
-                        type = "failed";
+                        type = TestType.Failed;
                         msg = failureMsg;
                     }
                 }
                 else if ("skipped" in result) {
                     if (result.skipped["@_type"] === "pytest.xfail") {
-                        type = "xfailed";
+                        type = TestType.XFailed;
                     }
                     else {
-                        type = "skipped";
+                        type = TestType.Skipped;
                     }
                     msg = result.skipped["@_message"];
                 }
                 else if ("error" in result) {
-                    type = "error";
+                    type = TestType.Error;
                     msg = result.error["#text"];
                 }
                 else {
-                    type = "passed";
+                    type = TestType.Passed;
                     msg = undefined;
                 }
                 results.tests.push({
@@ -320,13 +330,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.postResults = postResults;
 const gha = __importStar(__nccwpck_require__(2186));
 const utils_1 = __nccwpck_require__(4729);
+const parse_1 = __nccwpck_require__(5933);
 const resultTypes = [
-    "passed",
-    "skipped",
-    "xfailed",
-    "failed",
-    "xpassed",
-    "error",
+    parse_1.TestType.Passed,
+    parse_1.TestType.Skipped,
+    parse_1.TestType.XFailed,
+    parse_1.TestType.Failed,
+    parse_1.TestType.XPassed,
+    parse_1.TestType.Error,
 ];
 const resultTypesWithEmoji = (0, utils_1.zip)([...resultTypes], ["green", "yellow", "yellow", "red", "red", "red"].map((color) => `:${color}_circle:`));
 async function postResults(results, inputs) {
@@ -334,12 +345,12 @@ async function postResults(results, inputs) {
     const oldFormatResults = {
         total_time: results.total_time,
         total_tests: results.total_tests,
-        passed: results.tests.filter(t => t.type === "passed"),
-        failed: results.tests.filter(t => t.type === "failed"),
-        skipped: results.tests.filter(t => t.type === "skipped"),
-        xfailed: results.tests.filter(t => t.type === "xfailed"),
-        xpassed: results.tests.filter(t => t.type === "xpassed"),
-        error: results.tests.filter(t => t.type === "error"),
+        passed: results.tests.filter((t) => t.type === parse_1.TestType.Passed),
+        failed: results.tests.filter((t) => t.type === parse_1.TestType.Failed),
+        skipped: results.tests.filter((t) => t.type === parse_1.TestType.Skipped),
+        xfailed: results.tests.filter((t) => t.type === parse_1.TestType.XFailed),
+        xpassed: results.tests.filter((t) => t.type === parse_1.TestType.XPassed),
+        error: results.tests.filter((t) => t.type === parse_1.TestType.Error),
     };
     addResults(oldFormatResults, inputs.title, inputs.summary, inputs.displayOptions);
     await gha.summary.write();
@@ -390,13 +401,13 @@ function getResultTypesFromDisplayOptions(displayOptions) {
     }
     const displayTypes = new Set();
     for (const [displayChar, displayType] of [
-        ["f", "failed"],
-        ["E", "error"],
-        ["s", "skipped"],
-        ["x", "xfailed"],
-        ["X", "xpassed"],
-        ["p", "passed"],
-        ["P", "passed"],
+        ["f", parse_1.TestType.Failed],
+        ["E", parse_1.TestType.Error],
+        ["s", parse_1.TestType.Skipped],
+        ["x", parse_1.TestType.XFailed],
+        ["X", parse_1.TestType.XPassed],
+        ["p", parse_1.TestType.Passed],
+        ["P", parse_1.TestType.Passed],
     ]) {
         if (displayOptions.includes(displayChar)) {
             displayTypes.add(displayType);
