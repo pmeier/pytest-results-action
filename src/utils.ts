@@ -1,36 +1,3 @@
-async function* prefixAsyncGenerator<T>(
-  prefix: T,
-  gen: AsyncGenerator<T>
-): AsyncGenerator<T> {
-  yield prefix;
-  for await (const item of gen) {
-    yield item;
-  }
-}
-
-interface GeneratorCheckResult<T> {
-  isEmpty: boolean;
-  generator: AsyncGenerator<T>;
-}
-
-export async function checkAsyncGeneratorEmpty<T>(
-  gen: AsyncGenerator<T>
-): Promise<GeneratorCheckResult<T>> {
-  const { done, value } = await gen.next();
-  let isEmpty: boolean;
-  let out_gen: AsyncGenerator<T>;
-
-  if (done) {
-    isEmpty = true;
-    out_gen = gen;
-  } else {
-    isEmpty = false;
-    out_gen = prefixAsyncGenerator(value, gen);
-  }
-
-  return { isEmpty, generator: out_gen };
-}
-
 export function prettyDuration(seconds: number): string {
   seconds = Math.ceil(seconds);
 

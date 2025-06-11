@@ -35,18 +35,16 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.main = main;
 const gha = __importStar(require("@actions/core"));
-const utils_1 = require("./utils");
 const io_1 = require("./io");
 const parse_1 = require("./parse");
 const summary_1 = require("./summary");
 async function main(inputs) {
-    let xmls = (0, io_1.parseXmlFiles)(inputs.path);
-    const { isEmpty, generator } = await (0, utils_1.checkAsyncGeneratorEmpty)(xmls);
-    if (isEmpty && inputs.failOnEmpty) {
+    const xmls = await (0, io_1.parseXmlFiles)(inputs.path);
+    if (xmls.length === 0 && inputs.failOnEmpty) {
         gha.setFailed("No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case");
+        return;
     }
-    xmls = generator;
-    const results = await (0, parse_1.extractResults)(xmls);
+    const results = (0, parse_1.extractResults)(xmls);
     if (results.total_tests === 0) {
         return;
     }

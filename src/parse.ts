@@ -14,7 +14,7 @@ export interface TestResults {
   error: TestResult[];
 }
 
-export async function extractResults(xmls: AsyncGenerator<any>): Promise<TestResults> {
+export function extractResults(xmls: any[]): TestResults {
   const results: TestResults = {
     total_time: 0.0,
     total_tests: 0,
@@ -26,7 +26,7 @@ export async function extractResults(xmls: AsyncGenerator<any>): Promise<TestRes
     error: [],
   };
 
-  for await (const xml of xmls) {
+  for (const xml of xmls) {
     let testSuites = xml.testsuites.testsuite;
     testSuites = testSuites instanceof Array ? testSuites : [testSuites];
 

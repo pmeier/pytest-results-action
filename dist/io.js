@@ -33,17 +33,17 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.collectXmlFiles = collectXmlFiles;
 exports.parseXmlFiles = parseXmlFiles;
 const fs_1 = require("fs");
 const core = __importStar(require("@actions/core"));
 const glob = __importStar(require("@actions/glob"));
 const fast_xml_parser_1 = require("fast-xml-parser");
-async function* collectXmlFiles(path) {
+async function collectXmlFiles(path) {
     const globber = await glob.create(path, {
         implicitDescendants: false,
     });
     const paths = await globber.glob();
+    const files = [];
     for (const file_or_dir of paths) {
         let stats;
         try {
@@ -54,25 +54,23 @@ async function* collectXmlFiles(path) {
             continue;
         }
         if (stats.isFile()) {
-            yield file_or_dir;
+            files.push(file_or_dir);
         }
         else {
             const globber = await glob.create(file_or_dir + "/**/*.xml", {
                 implicitDescendants: false,
             });
-            const files = await globber.glob();
-            for (const file of files) {
-                yield file;
-            }
+            const subFiles = await globber.glob();
+            files.push(...subFiles);
         }
     }
+    return files;
 }
-async function* parseXmlFiles(path) {
+async function parseXmlFiles(path) {
     const parser = new fast_xml_parser_1.XMLParser({
         ignoreAttributes: false,
         processEntities: false,
     });
-    for await (const file of collectXmlFiles(path)) {
-        yield parser.parse(await fs_1.promises.readFile(file, "utf-8"));
-    }
+    const files = await collectXmlFiles(path);
+    return Promise.all(files.map(file => fs_1.promises.readFile(file, "utf-8").then(content => parser.parse(content))));
 }

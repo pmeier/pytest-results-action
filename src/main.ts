@@ -1,5 +1,4 @@
 import * as gha from "@actions/core";
-import { checkAsyncGeneratorEmpty } from "./utils";
 import { parseXmlFiles } from "./io";
 import { extractResults } from "./parse";
 import { postResults } from "./summary";
@@ -13,17 +12,16 @@ export interface ActionInputs {
 }
 
 export async function main(inputs: ActionInputs): Promise<void> {
-  let xmls = parseXmlFiles(inputs.path);
-
-  const { isEmpty, generator } = await checkAsyncGeneratorEmpty(xmls);
-  if (isEmpty && inputs.failOnEmpty) {
+  const xmls = await parseXmlFiles(inputs.path);
+  
+  if (xmls.length === 0 && inputs.failOnEmpty) {
     gha.setFailed(
       "No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case"
     );
+    return;
   }
-  xmls = generator;
 
-  const results = await extractResults(xmls);
+  const results = extractResults(xmls);
   if (results.total_tests === 0) {
     return;
   }

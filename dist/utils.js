@@ -1,28 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkAsyncGeneratorEmpty = checkAsyncGeneratorEmpty;
 exports.prettyDuration = prettyDuration;
 exports.zip = zip;
-async function* prefixAsyncGenerator(prefix, gen) {
-    yield prefix;
-    for await (const item of gen) {
-        yield item;
-    }
-}
-async function checkAsyncGeneratorEmpty(gen) {
-    const { done, value } = await gen.next();
-    let isEmpty;
-    let out_gen;
-    if (done) {
-        isEmpty = true;
-        out_gen = gen;
-    }
-    else {
-        isEmpty = false;
-        out_gen = prefixAsyncGenerator(value, gen);
-    }
-    return { isEmpty, generator: out_gen };
-}
 function prettyDuration(seconds) {
     seconds = Math.ceil(seconds);
     let minutes = Math.floor(seconds / 60);

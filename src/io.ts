@@ -7,11 +7,12 @@ interface TestSuite {
   [key: string]: any;
 }
 
-export async function* collectXmlFiles(path: string): AsyncGenerator<string> {
+async function collectXmlFiles(path: string): Promise<string[]> {
   const globber = await glob.create(path, {
     implicitDescendants: false,
   });
   const paths = await globber.glob();
+  const files: string[] = [];
 
   for (const file_or_dir of paths) {
     let stats;
@@ -22,26 +23,25 @@ export async function* collectXmlFiles(path: string): AsyncGenerator<string> {
       continue;
     }
     if (stats.isFile()) {
-      yield file_or_dir;
+      files.push(file_or_dir);
     } else {
       const globber = await glob.create(file_or_dir + "/**/*.xml", {
         implicitDescendants: false,
       });
-      const files = await globber.glob();
-      for (const file of files) {
-        yield file;
-      }
+      const subFiles = await globber.glob();
+      files.push(...subFiles);
     }
   }
+
+  return files;
 }
 
-export async function* parseXmlFiles(path: string): AsyncGenerator<TestSuite> {
+export async function parseXmlFiles(path: string): Promise<TestSuite[]> {
   const parser = new XMLParser({
     ignoreAttributes: false,
     processEntities: false,
   });
 
-  for await (const file of collectXmlFiles(path)) {
-    yield parser.parse(await fs.readFile(file, "utf-8"));
-  }
+  const files = await collectXmlFiles(path);
+  return Promise.all(files.map(file => fs.readFile(file, "utf-8").then(content => parser.parse(content))));
 }

@@ -103,17 +103,17 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.collectXmlFiles = collectXmlFiles;
 exports.parseXmlFiles = parseXmlFiles;
 const fs_1 = __nccwpck_require__(7147);
 const core = __importStar(__nccwpck_require__(2186));
 const glob = __importStar(__nccwpck_require__(8090));
 const fast_xml_parser_1 = __nccwpck_require__(2603);
-async function* collectXmlFiles(path) {
+async function collectXmlFiles(path) {
     const globber = await glob.create(path, {
         implicitDescendants: false,
     });
     const paths = await globber.glob();
+    const files = [];
     for (const file_or_dir of paths) {
         let stats;
         try {
@@ -124,27 +124,25 @@ async function* collectXmlFiles(path) {
             continue;
         }
         if (stats.isFile()) {
-            yield file_or_dir;
+            files.push(file_or_dir);
         }
         else {
             const globber = await glob.create(file_or_dir + "/**/*.xml", {
                 implicitDescendants: false,
             });
-            const files = await globber.glob();
-            for (const file of files) {
-                yield file;
-            }
+            const subFiles = await globber.glob();
+            files.push(...subFiles);
         }
     }
+    return files;
 }
-async function* parseXmlFiles(path) {
+async function parseXmlFiles(path) {
     const parser = new fast_xml_parser_1.XMLParser({
         ignoreAttributes: false,
         processEntities: false,
     });
-    for await (const file of collectXmlFiles(path)) {
-        yield parser.parse(await fs_1.promises.readFile(file, "utf-8"));
-    }
+    const files = await collectXmlFiles(path);
+    return Promise.all(files.map(file => fs_1.promises.readFile(file, "utf-8").then(content => parser.parse(content))));
 }
 
 
@@ -191,18 +189,16 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.main = main;
 const gha = __importStar(__nccwpck_require__(2186));
-const utils_1 = __nccwpck_require__(4729);
 const io_1 = __nccwpck_require__(1623);
 const parse_1 = __nccwpck_require__(5933);
 const summary_1 = __nccwpck_require__(4676);
 async function main(inputs) {
-    let xmls = (0, io_1.parseXmlFiles)(inputs.path);
-    const { isEmpty, generator } = await (0, utils_1.checkAsyncGeneratorEmpty)(xmls);
-    if (isEmpty && inputs.failOnEmpty) {
+    const xmls = await (0, io_1.parseXmlFiles)(inputs.path);
+    if (xmls.length === 0 && inputs.failOnEmpty) {
         gha.setFailed("No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case");
+        return;
     }
-    xmls = generator;
-    const results = await (0, parse_1.extractResults)(xmls);
+    const results = (0, parse_1.extractResults)(xmls);
     if (results.total_tests === 0) {
         return;
     }
@@ -219,7 +215,7 @@ async function main(inputs) {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.extractResults = extractResults;
-async function extractResults(xmls) {
+function extractResults(xmls) {
     const results = {
         total_time: 0.0,
         total_tests: 0,
@@ -230,7 +226,7 @@ async function extractResults(xmls) {
         xpassed: [],
         error: [],
     };
-    for await (const xml of xmls) {
+    for (const xml of xmls) {
         let testSuites = xml.testsuites.testsuite;
         testSuites = testSuites instanceof Array ? testSuites : [testSuites];
         for (const testSuite of testSuites) {
@@ -414,29 +410,8 @@ function addDetailsWithCodeBlock(summary, label, code) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.checkAsyncGeneratorEmpty = checkAsyncGeneratorEmpty;
 exports.prettyDuration = prettyDuration;
 exports.zip = zip;
-async function* prefixAsyncGenerator(prefix, gen) {
-    yield prefix;
-    for await (const item of gen) {
-        yield item;
-    }
-}
-async function checkAsyncGeneratorEmpty(gen) {
-    const { done, value } = await gen.next();
-    let isEmpty;
-    let out_gen;
-    if (done) {
-        isEmpty = true;
-        out_gen = gen;
-    }
-    else {
-        isEmpty = false;
-        out_gen = prefixAsyncGenerator(value, gen);
-    }
-    return { isEmpty, generator: out_gen };
-}
 function prettyDuration(seconds) {
     seconds = Math.ceil(seconds);
     let minutes = Math.floor(seconds / 60);

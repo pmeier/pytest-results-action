@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.extractResults = extractResults;
-async function extractResults(xmls) {
+function extractResults(xmls) {
     const results = {
         total_time: 0.0,
         total_tests: 0,
@@ -12,7 +12,7 @@ async function extractResults(xmls) {
         xpassed: [],
         error: [],
     };
-    for await (const xml of xmls) {
+    for (const xml of xmls) {
         let testSuites = xml.testsuites.testsuite;
         testSuites = testSuites instanceof Array ? testSuites : [testSuites];
         for (const testSuite of testSuites) {
