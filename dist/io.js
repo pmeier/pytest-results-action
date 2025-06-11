@@ -33,23 +33,44 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-const gha = __importStar(require("@actions/core"));
-const main_1 = require("./main");
-async function entrypoint() {
-    const inputs = getInputs();
-    await (0, main_1.main)(inputs);
+exports.parseXmlFiles = parseXmlFiles;
+const fs_1 = require("fs");
+const core = __importStar(require("@actions/core"));
+const glob = __importStar(require("@actions/glob"));
+const fast_xml_parser_1 = require("fast-xml-parser");
+async function collectXmlFiles(path) {
+    const globber = await glob.create(path, {
+        implicitDescendants: false,
+    });
+    const paths = await globber.glob();
+    const files = [];
+    for (const file_or_dir of paths) {
+        let stats;
+        try {
+            stats = await fs_1.promises.stat(file_or_dir);
+        }
+        catch (error) {
+            core.setFailed(`Action failed with error ${error}`);
+            continue;
+        }
+        if (stats.isFile()) {
+            files.push(file_or_dir);
+        }
+        else {
+            const globber = await glob.create(file_or_dir + "/**/*.xml", {
+                implicitDescendants: false,
+            });
+            const subFiles = await globber.glob();
+            files.push(...subFiles);
+        }
+    }
+    return files;
 }
-function getInputs() {
-    return {
-        path: gha.getInput("path", { required: true }),
-        summary: gha.getBooleanInput("summary", {
-            required: false,
-        }),
-        displayOptions: gha.getInput("display-options", { required: false }),
-        failOnEmpty: gha.getBooleanInput("fail-on-empty", {
-            required: false,
-        }),
-        title: gha.getInput("title", { required: false }),
-    };
+async function parseXmlFiles(path) {
+    const parser = new fast_xml_parser_1.XMLParser({
+        ignoreAttributes: false,
+        processEntities: false,
+    });
+    const files = await collectXmlFiles(path);
+    return Promise.all(files.map((file) => fs_1.promises.readFile(file, "utf-8").then((content) => parser.parse(content))));
 }
-entrypoint();

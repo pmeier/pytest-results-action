@@ -2,10 +2,11 @@
   "name": "pytest-results-actions",
   "version": "0.7.0",
   "description": "Post pytest results to the workflow summary",
-  "main": "src/main.js",
+  "main": "action/index.js",
   "scripts": {
-    "build": "ncc build --license=LICENSE src/index.js",
-    "format": "prettier --write ."
+    "build": "tsc && ncc build --license=LICENSE --out action dist/index.js",
+    "format": "prettier --write .",
+    "type-check": "tsc --noEmit"
   },
   "repository": {
     "type": "git",
@@ -25,7 +26,9 @@
     "fast-xml-parser": "^4.1"
   },
   "devDependencies": {
+    "@types/node": "^20.0",
     "@vercel/ncc": "^0.36",
-    "prettier": "^2.8"
+    "prettier": "^2.8",
+    "typescript": "^5.0"
   }
 }

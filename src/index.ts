@@ -1,13 +1,20 @@
-const gha = require("@actions/core");
+import * as gha from "@actions/core";
+import { main } from "./main";
 
-const { main } = require("./main");
+interface ActionInputs {
+  path: string;
+  summary?: boolean;
+  displayOptions?: string;
+  failOnEmpty?: boolean;
+  title?: string;
+}
 
-async function entrypoint() {
+async function entrypoint(): Promise<void> {
   const inputs = getInputs();
   await main(inputs);
 }
 
-function getInputs() {
+function getInputs(): ActionInputs {
   return {
     path: gha.getInput("path", { required: true }),
     summary: gha.getBooleanInput("summary", {

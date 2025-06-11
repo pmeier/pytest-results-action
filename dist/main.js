@@ -33,23 +33,20 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.main = main;
 const gha = __importStar(require("@actions/core"));
-const main_1 = require("./main");
-async function entrypoint() {
-    const inputs = getInputs();
-    await (0, main_1.main)(inputs);
+const io_1 = require("./io");
+const parse_1 = require("./parse");
+const summary_1 = require("./summary");
+async function main(inputs) {
+    const xmls = await (0, io_1.parseXmlFiles)(inputs.path);
+    if (xmls.length === 0 && inputs.failOnEmpty) {
+        gha.setFailed("No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case");
+        return;
+    }
+    const results = (0, parse_1.extractResults)(xmls);
+    if (results.total_tests === 0) {
+        return;
+    }
+    await (0, summary_1.postResults)(results, inputs);
 }
-function getInputs() {
-    return {
-        path: gha.getInput("path", { required: true }),
-        summary: gha.getBooleanInput("summary", {
-            required: false,
-        }),
-        displayOptions: gha.getInput("display-options", { required: false }),
-        failOnEmpty: gha.getBooleanInput("fail-on-empty", {
-            required: false,
-        }),
-        title: gha.getInput("title", { required: false }),
-    };
-}
-entrypoint();
