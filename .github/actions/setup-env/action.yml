@@ -11,7 +11,9 @@ runs:
         install: true
 
     - name: Install node modules
+      shell: bash
       run: npm clean-install
 
     - name: Setup Python virtual environment
+      shell: bash
       run: uv venv
