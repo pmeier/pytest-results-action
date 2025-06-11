@@ -1,0 +1,17 @@
+name: setup-env
+description: "Setup environment"
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup mise and install tools
+      uses: jdx/mise-action@v2
+      with:
+        install: true
+
+    - name: Install node modules
+      run: npm clean-install
+
+    - name: Setup Python virtual environment
+      run: uv venv
