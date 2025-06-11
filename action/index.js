@@ -193,7 +193,8 @@ exports.main = main;
 const gha = __importStar(__nccwpck_require__(2186));
 const utils_1 = __nccwpck_require__(4729);
 const io_1 = __nccwpck_require__(1623);
-const results_1 = __nccwpck_require__(2607);
+const parse_1 = __nccwpck_require__(5933);
+const summary_1 = __nccwpck_require__(4676);
 async function main(inputs) {
     let xmls = (0, io_1.parseXmlFiles)(inputs.path);
     const { isEmpty, generator } = await (0, utils_1.checkAsyncGeneratorEmpty)(xmls);
@@ -201,71 +202,23 @@ async function main(inputs) {
         gha.setFailed("No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case");
     }
     xmls = generator;
-    await (0, results_1.postResults)(xmls, inputs);
+    const results = await (0, parse_1.extractResults)(xmls);
+    if (results.total_tests === 0) {
+        return;
+    }
+    await (0, summary_1.postResults)(results, inputs);
 }
 
 
 /***/ }),
 
-/***/ 2607:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ 5933:
+/***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.postResults = postResults;
-const gha = __importStar(__nccwpck_require__(2186));
-const utils_1 = __nccwpck_require__(4729);
-const resultTypes = [
-    "passed",
-    "skipped",
-    "xfailed",
-    "failed",
-    "xpassed",
-    "error",
-];
-const resultTypesWithEmoji = (0, utils_1.zip)([...resultTypes], ["green", "yellow", "yellow", "red", "red", "red"].map((color) => `:${color}_circle:`));
-async function postResults(xmls, inputs) {
-    const results = await extractResults(xmls);
-    if (results.total_tests === 0) {
-        return;
-    }
-    addResults(results, inputs.title, inputs.summary, inputs.displayOptions);
-    await gha.summary.write();
-}
+exports.extractResults = extractResults;
 async function extractResults(xmls) {
     const results = {
         total_time: 0.0,
@@ -328,6 +281,65 @@ async function extractResults(xmls) {
         }
     }
     return results;
+}
+
+
+/***/ }),
+
+/***/ 4676:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.postResults = postResults;
+const gha = __importStar(__nccwpck_require__(2186));
+const utils_1 = __nccwpck_require__(4729);
+const resultTypes = [
+    "passed",
+    "skipped",
+    "xfailed",
+    "failed",
+    "xpassed",
+    "error",
+];
+const resultTypesWithEmoji = (0, utils_1.zip)([...resultTypes], ["green", "yellow", "yellow", "red", "red", "red"].map((color) => `:${color}_circle:`));
+async function postResults(results, inputs) {
+    addResults(results, inputs.title, inputs.summary, inputs.displayOptions);
+    await gha.summary.write();
 }
 function addResults(results, title, summary, displayOptions) {
     if (title) {

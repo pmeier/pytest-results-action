@@ -1,7 +1,8 @@
 import * as gha from "@actions/core";
 import { checkAsyncGeneratorEmpty } from "./utils";
 import { parseXmlFiles } from "./io";
-import { postResults } from "./results";
+import { extractResults } from "./parse";
+import { postResults } from "./summary";
 
 export interface ActionInputs {
   path: string;
@@ -22,5 +23,10 @@ export async function main(inputs: ActionInputs): Promise<void> {
   }
   xmls = generator;
 
-  await postResults(xmls, inputs);
+  const results = await extractResults(xmls);
+  if (results.total_tests === 0) {
+    return;
+  }
+
+  await postResults(results, inputs);
 }
