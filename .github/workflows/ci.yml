@@ -77,7 +77,7 @@ jobs:
         run: uv pip install pytest
 
       - name: Run tests
-        run: pytest --junit-xml=test-results.xml || true
+        run: uv run pytest --junit-xml=test-results.xml || true
 
       - name: Summarize test results
         uses: ./
