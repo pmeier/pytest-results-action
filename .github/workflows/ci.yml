@@ -53,11 +53,16 @@ jobs:
         run: npm run build
 
       - name: Check synchronicity
+        id: sync
         run: |
           if [ "$(git diff | wc -l)" -gt "0" ]; then
             echo "dist/ is out of sync with src/. Please run \`npm run build\` and commit the results."
             exit 1
           fi
+
+      - name: Display diff
+        if: steps.sync.outcome == 'failure'
+        run: git diff
 
   integration-smoke-test:
     runs-on: ubuntu-latest
