@@ -1,24 +1,25 @@
-const fs = require("fs").promises;
+import { promises as fs } from "fs";
+import * as core from "@actions/core";
+import * as glob from "@actions/glob";
+import { XMLParser } from "fast-xml-parser";
 
-const core = require("@actions/core");
-const glob = require("@actions/glob");
+interface TestSuite {
+  [key: string]: any;
+}
 
-const { XMLParser } = require("fast-xml-parser");
-
-module.exports = { parseXmlFiles };
-
-async function* collectXmlFiles(path) {
+export async function* collectXmlFiles(path: string): AsyncGenerator<string> {
   const globber = await glob.create(path, {
     implicitDescendants: false,
   });
   const paths = await globber.glob();
 
   for (const file_or_dir of paths) {
-    var stats;
+    let stats;
     try {
       stats = await fs.stat(file_or_dir);
     } catch (error) {
       core.setFailed(`Action failed with error ${error}`);
+      continue;
     }
     if (stats.isFile()) {
       yield file_or_dir;
@@ -26,14 +27,15 @@ async function* collectXmlFiles(path) {
       const globber = await glob.create(file_or_dir + "/**/*.xml", {
         implicitDescendants: false,
       });
-      for await (const file of globber.glob()) {
+      const files = await globber.glob();
+      for (const file of files) {
         yield file;
       }
     }
   }
 }
 
-async function* parseXmlFiles(path) {
+export async function* parseXmlFiles(path: string): AsyncGenerator<TestSuite> {
   const parser = new XMLParser({
     ignoreAttributes: false,
     processEntities: false,
@@ -42,4 +44,4 @@ async function* parseXmlFiles(path) {
   for await (const file of collectXmlFiles(path)) {
     yield parser.parse(await fs.readFile(file, "utf-8"));
   }
-}
+} 
