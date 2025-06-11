@@ -44,4 +44,4 @@ export async function* parseXmlFiles(path: string): AsyncGenerator<TestSuite> {
   for await (const file of collectXmlFiles(path)) {
     yield parser.parse(await fs.readFile(file, "utf-8"));
   }
-} 
+}

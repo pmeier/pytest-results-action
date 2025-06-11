@@ -1,4 +1,7 @@
-async function* prefixAsyncGenerator<T>(prefix: T, gen: AsyncGenerator<T>): AsyncGenerator<T> {
+async function* prefixAsyncGenerator<T>(
+  prefix: T,
+  gen: AsyncGenerator<T>
+): AsyncGenerator<T> {
   yield prefix;
   for await (const item of gen) {
     yield item;
@@ -10,11 +13,13 @@ interface GeneratorCheckResult<T> {
   generator: AsyncGenerator<T>;
 }
 
-export async function checkAsyncGeneratorEmpty<T>(gen: AsyncGenerator<T>): Promise<GeneratorCheckResult<T>> {
+export async function checkAsyncGeneratorEmpty<T>(
+  gen: AsyncGenerator<T>
+): Promise<GeneratorCheckResult<T>> {
   const { done, value } = await gen.next();
   let isEmpty: boolean;
   let out_gen: AsyncGenerator<T>;
-  
+
   if (done) {
     isEmpty = true;
     out_gen = gen;
@@ -46,4 +51,4 @@ export function prettyDuration(seconds: number): string {
 
 export function zip<T, U>(a: T[], b: U[]): [T, U][] {
   return a.map((obj, idx) => [obj, b[idx]]);
-} 
+}

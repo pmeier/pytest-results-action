@@ -23,4 +23,4 @@ export async function main(inputs: ActionInputs): Promise<void> {
   xmls = generator;
 
   await postResults(xmls, inputs);
-} 
+}

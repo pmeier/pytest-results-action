@@ -28,4 +28,4 @@ function getInputs(): ActionInputs {
   };
 }
 
-entrypoint(); 
+entrypoint();
