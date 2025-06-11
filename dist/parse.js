@@ -5,12 +5,7 @@ function extractResults(xmls) {
     const results = {
         total_time: 0.0,
         total_tests: 0,
-        passed: [],
-        failed: [],
-        skipped: [],
-        xfailed: [],
-        xpassed: [],
-        error: [],
+        tests: [],
     };
     for (const xml of xmls) {
         let testSuites = xml.testsuites.testsuite;
@@ -23,40 +18,41 @@ function extractResults(xmls) {
             }
             testCases = testCases instanceof Array ? testCases : [testCases];
             for (const result of testCases) {
-                let resultTypeArray;
+                let type;
                 let msg;
                 if ("failure" in result) {
                     const failureMsg = result.failure["#text"];
                     const parts = failureMsg.split("[XPASS(strict)] ");
                     if (parts.length === 2) {
-                        resultTypeArray = results.xpassed;
+                        type = "xpassed";
                         msg = parts[1];
                     }
                     else {
-                        resultTypeArray = results.failed;
+                        type = "failed";
                         msg = failureMsg;
                     }
                 }
                 else if ("skipped" in result) {
                     if (result.skipped["@_type"] === "pytest.xfail") {
-                        resultTypeArray = results.xfailed;
+                        type = "xfailed";
                     }
                     else {
-                        resultTypeArray = results.skipped;
+                        type = "skipped";
                     }
                     msg = result.skipped["@_message"];
                 }
                 else if ("error" in result) {
-                    resultTypeArray = results.error;
+                    type = "error";
                     msg = result.error["#text"];
                 }
                 else {
-                    resultTypeArray = results.passed;
+                    type = "passed";
                     msg = undefined;
                 }
-                resultTypeArray.push({
+                results.tests.push({
                     id: result["@_classname"] + "." + result["@_name"],
-                    msg: msg,
+                    type,
+                    msg,
                 });
                 results.total_tests += 1;
             }

@@ -43,5 +43,9 @@ export async function parseXmlFiles(path: string): Promise<TestSuite[]> {
   });
 
   const files = await collectXmlFiles(path);
-  return Promise.all(files.map(file => fs.readFile(file, "utf-8").then(content => parser.parse(content))));
+  return Promise.all(
+    files.map((file) =>
+      fs.readFile(file, "utf-8").then((content) => parser.parse(content))
+    )
+  );
 }

@@ -46,7 +46,18 @@ const resultTypes = [
 ];
 const resultTypesWithEmoji = (0, utils_1.zip)([...resultTypes], ["green", "yellow", "yellow", "red", "red", "red"].map((color) => `:${color}_circle:`));
 async function postResults(results, inputs) {
-    addResults(results, inputs.title, inputs.summary, inputs.displayOptions);
+    // Create a temporary structure that matches the old format
+    const oldFormatResults = {
+        total_time: results.total_time,
+        total_tests: results.total_tests,
+        passed: results.tests.filter(t => t.type === "passed"),
+        failed: results.tests.filter(t => t.type === "failed"),
+        skipped: results.tests.filter(t => t.type === "skipped"),
+        xfailed: results.tests.filter(t => t.type === "xfailed"),
+        xpassed: results.tests.filter(t => t.type === "xpassed"),
+        error: results.tests.filter(t => t.type === "error"),
+    };
+    addResults(oldFormatResults, inputs.title, inputs.summary, inputs.displayOptions);
     await gha.summary.write();
 }
 function addResults(results, title, summary, displayOptions) {

@@ -1,29 +1,28 @@
-interface TestResult {
+export type TestType =
+  | "passed"
+  | "skipped"
+  | "xfailed"
+  | "failed"
+  | "xpassed"
+  | "error";
+
+export interface TestResult {
   id: string;
+  type: TestType;
   msg?: string;
 }
 
 export interface TestResults {
   total_time: number;
   total_tests: number;
-  passed: TestResult[];
-  failed: TestResult[];
-  skipped: TestResult[];
-  xfailed: TestResult[];
-  xpassed: TestResult[];
-  error: TestResult[];
+  tests: TestResult[];
 }
 
 export function extractResults(xmls: any[]): TestResults {
   const results: TestResults = {
     total_time: 0.0,
     total_tests: 0,
-    passed: [],
-    failed: [],
-    skipped: [],
-    xfailed: [],
-    xpassed: [],
-    error: [],
+    tests: [],
   };
 
   for (const xml of xmls) {
@@ -39,37 +38,38 @@ export function extractResults(xmls: any[]): TestResults {
       }
       testCases = testCases instanceof Array ? testCases : [testCases];
       for (const result of testCases) {
-        let resultTypeArray: TestResult[];
+        let type: TestType;
         let msg: string | undefined;
 
         if ("failure" in result) {
           const failureMsg = result.failure["#text"];
           const parts = failureMsg.split("[XPASS(strict)] ");
           if (parts.length === 2) {
-            resultTypeArray = results.xpassed;
+            type = "xpassed";
             msg = parts[1];
           } else {
-            resultTypeArray = results.failed;
+            type = "failed";
             msg = failureMsg;
           }
         } else if ("skipped" in result) {
           if (result.skipped["@_type"] === "pytest.xfail") {
-            resultTypeArray = results.xfailed;
+            type = "xfailed";
           } else {
-            resultTypeArray = results.skipped;
+            type = "skipped";
           }
           msg = result.skipped["@_message"];
         } else if ("error" in result) {
-          resultTypeArray = results.error;
+          type = "error";
           msg = result.error["#text"];
         } else {
-          resultTypeArray = results.passed;
+          type = "passed";
           msg = undefined;
         }
 
-        resultTypeArray.push({
+        results.tests.push({
           id: result["@_classname"] + "." + result["@_name"],
-          msg: msg,
+          type,
+          msg,
         });
         results.total_tests += 1;
       }
@@ -77,4 +77,4 @@ export function extractResults(xmls: any[]): TestResults {
   }
 
   return results;
-} 
+}

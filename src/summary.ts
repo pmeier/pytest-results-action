@@ -1,7 +1,7 @@
 import * as gha from "@actions/core";
 import { zip, prettyDuration } from "./utils";
 import type { ActionInputs } from "./main";
-import type { TestResults } from "./parse";
+import type { TestResults, TestResult } from "./parse";
 
 const resultTypes = [
   "passed",
@@ -12,8 +12,19 @@ const resultTypes = [
   "error",
 ] as const;
 
-type ResultType = typeof resultTypes[number];
-type ResultArrayKey = Exclude<keyof TestResults, "total_time" | "total_tests">;
+type ResultType = (typeof resultTypes)[number];
+
+// Temporary interface that matches the old structure
+interface OldFormatTestResults {
+  total_time: number;
+  total_tests: number;
+  passed: TestResult[];
+  failed: TestResult[];
+  skipped: TestResult[];
+  xfailed: TestResult[];
+  xpassed: TestResult[];
+  error: TestResult[];
+}
 
 const resultTypesWithEmoji = zip(
   [...resultTypes],
@@ -22,12 +33,37 @@ const resultTypesWithEmoji = zip(
   )
 );
 
-export async function postResults(results: TestResults, inputs: ActionInputs): Promise<void> {
-  addResults(results, inputs.title, inputs.summary, inputs.displayOptions);
+export async function postResults(
+  results: TestResults,
+  inputs: ActionInputs
+): Promise<void> {
+  // Create a temporary structure that matches the old format
+  const oldFormatResults: OldFormatTestResults = {
+    total_time: results.total_time,
+    total_tests: results.total_tests,
+    passed: results.tests.filter((t) => t.type === "passed"),
+    failed: results.tests.filter((t) => t.type === "failed"),
+    skipped: results.tests.filter((t) => t.type === "skipped"),
+    xfailed: results.tests.filter((t) => t.type === "xfailed"),
+    xpassed: results.tests.filter((t) => t.type === "xpassed"),
+    error: results.tests.filter((t) => t.type === "error"),
+  };
+
+  addResults(
+    oldFormatResults,
+    inputs.title,
+    inputs.summary,
+    inputs.displayOptions
+  );
   await gha.summary.write();
 }
 
-function addResults(results: TestResults, title?: string, summary?: boolean, displayOptions?: string): void {
+function addResults(
+  results: OldFormatTestResults,
+  title?: string,
+  summary?: boolean,
+  displayOptions?: string
+): void {
   if (title) {
     gha.summary.addHeading(title);
   }
@@ -36,7 +72,9 @@ function addResults(results: TestResults, title?: string, summary?: boolean, dis
     addSummary(results);
   }
 
-  for (const resultType of getResultTypesFromDisplayOptions(displayOptions || "")) {
+  for (const resultType of getResultTypesFromDisplayOptions(
+    displayOptions || ""
+  )) {
     const results_for_type = results[resultType];
     if (!results_for_type.length) {
       continue;
@@ -46,11 +84,7 @@ function addResults(results: TestResults, title?: string, summary?: boolean, dis
 
     for (const result of results_for_type) {
       if (result.msg) {
-        addDetailsWithCodeBlock(
-          gha.summary,
-          result.id,
-          result.msg
-        );
+        addDetailsWithCodeBlock(gha.summary, result.id, result.msg);
       } else {
         gha.summary.addRaw(`\n:heavy_check_mark: ${result.id}`, true);
       }
@@ -58,7 +92,7 @@ function addResults(results: TestResults, title?: string, summary?: boolean, dis
   }
 }
 
-function addSummary(results: TestResults): void {
+function addSummary(results: OldFormatTestResults): void {
   gha.summary.addRaw(
     `Ran ${results.total_tests} tests in ${prettyDuration(results.total_time)}`,
     true
@@ -66,7 +100,7 @@ function addSummary(results: TestResults): void {
 
   const rows = [["Result", "Amount"]];
   for (const [resultType, emoji] of resultTypesWithEmoji) {
-    const abs_amount = results[resultType as ResultArrayKey].length;
+    const abs_amount = results[resultType].length;
     const rel_amount = abs_amount / results.total_tests;
     rows.push([
       `${emoji} ${resultType}`,
@@ -76,7 +110,9 @@ function addSummary(results: TestResults): void {
   gha.summary.addTable(rows);
 }
 
-function getResultTypesFromDisplayOptions(displayOptions: string): ResultType[] {
+function getResultTypesFromDisplayOptions(
+  displayOptions: string
+): ResultType[] {
   // 'N' resets the list of chars passed to the '-r' option of pytest. Thus, we only
   // care about anything after the last occurrence
   const displayChars = displayOptions.split("N").pop() || "";
@@ -105,9 +141,10 @@ function getResultTypesFromDisplayOptions(displayOptions: string): ResultType[] 
   return [...displayTypes];
 }
 
-function addDetailsWithCodeBlock(summary: typeof gha.summary, label: string, code: string): void {
-  summary.addDetails(
-    label,
-    "\n\n" + code
-  );
-} 
+function addDetailsWithCodeBlock(
+  summary: typeof gha.summary,
+  label: string,
+  code: string
+): void {
+  summary.addDetails(label, "\n\n" + code);
+}

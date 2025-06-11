@@ -13,7 +13,7 @@ export interface ActionInputs {
 
 export async function main(inputs: ActionInputs): Promise<void> {
   const xmls = await parseXmlFiles(inputs.path);
-  
+
   if (xmls.length === 0 && inputs.failOnEmpty) {
     gha.setFailed(
       "No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case"
