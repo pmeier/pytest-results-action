@@ -61,7 +61,7 @@ jobs:
           fi
 
       - name: Display diff
-        if: steps.sync.outcome == 'failure'
+        if: ${{ failure() && steps.sync.outcome == 'failure' }}
         run: git diff
 
   integration-smoke-test:
