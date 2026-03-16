@@ -33,3 +33,10 @@ inputs:
     description: Title of the test results section in the workflow summary
     required: false
     default: Test results
+  pr-comment:
+    description: Post the results as a comment on pull request
+    default: false
+  github-token:
+    description: GitHub token to use for posting PR comments
+    required: false
+    default: ${{ github.token }}

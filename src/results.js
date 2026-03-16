@@ -1,6 +1,7 @@
 const fs = require("fs").promises;
 
 const gha = require("@actions/core");
+const ghApi = require("@actions/github");
 
 const { zip, prettyDuration } = require("./utils");
 
@@ -29,6 +30,10 @@ async function postResults(xmls, inputs) {
   }
 
   addResults(results, inputs.title, inputs.summary, inputs.displayOptions);
+
+  if (inputs.prComment && ghApi.context.payload.pull_request) {
+    await addComment(inputs);
+  }
   await gha.summary.write();
 }
 
@@ -145,6 +150,43 @@ function addSummary(results) {
     ]);
   }
   gha.summary.addTable(rows);
+}
+
+async function addComment(inputs) {
+  const octokit = ghApi.getOctokit(inputs.githubToken);
+
+  const pr_number = ghApi.context.payload.pull_request.number;
+  const repo = ghApi.context.repo.repo;
+  const owner = ghApi.context.repo.owner;
+
+  const { data: comments } = await octokit.rest.issues.listComments({
+    owner: owner,
+    repo: repo,
+    issue_number: pr_number,
+  });
+
+  const comment = comments.find((comment) => {
+    return (
+      comment.user.login === "github-actions[bot]" &&
+      comment.body.startsWith(`<h1>${inputs.title}</h1>`)
+    );
+  });
+
+  if (comment) {
+    await octokit.rest.issues.updateComment({
+      repo: repo,
+      owner: owner,
+      comment_id: comment.id,
+      body: gha.summary.stringify(),
+    });
+  } else {
+    await octokit.rest.issues.createComment({
+      repo: repo,
+      owner: owner,
+      issue_number: pr_number,
+      body: gha.summary.stringify(),
+    });
+  }
 }
 
 function getResultTypesFromDisplayOptions(displayOptions) {

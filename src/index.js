@@ -18,6 +18,8 @@ function getInputs() {
       required: false,
     }),
     title: gha.getInput("title", { required: false }),
+    prComment: gha.getBooleanInput("pr-comment", { required: false }),
+    githubToken: gha.getInput("github-token", { required: false }),
   };
 }
 

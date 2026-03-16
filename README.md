@@ -44,6 +44,12 @@ Since failing tests mean a non-zero exit code of `pytest`, `if: always()` needs 
 
     # (Optional) Title of the test results section in the workflow summary
     title: Test results
+
+    # (Optional) Post test results as a comment on pull request
+    pr-comment: false
+
+    # (Optional) GitHub token to use for posting PR comments
+    github-token: ${{ github.token }}
 ```
 
 The report will be posted to the workflow summary:

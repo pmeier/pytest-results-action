@@ -7,6 +7,10 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   format:
     runs-on: ubuntu-latest
@@ -84,3 +88,4 @@ jobs:
         uses: ./
         with:
           path: test-results.xml
+          pr-comment: true
