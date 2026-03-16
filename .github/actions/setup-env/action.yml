@@ -6,7 +6,7 @@ runs:
 
   steps:
     - name: Setup mise and install tools
-      uses: jdx/mise-action@v2
+      uses: jdx/mise-action@v4
       with:
         install: true
 
