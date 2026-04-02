@@ -2,6 +2,7 @@
   "name": "pytest-results-actions",
   "version": "0.7.0",
   "description": "Post pytest results to the workflow summary",
+  "type": "module",
   "main": "src/main.js",
   "scripts": {
     "build": "ncc build --license=LICENSE src/index.js",

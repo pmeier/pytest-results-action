@@ -1,11 +1,11 @@
-const fs = require("fs").promises;
+import { promises as fs } from "fs";
 
-const core = require("@actions/core");
-const glob = require("@actions/glob");
+import * as core from "@actions/core";
+import * as glob from "@actions/glob";
 
-const { XMLParser } = require("fast-xml-parser");
+import { XMLParser } from "fast-xml-parser";
 
-module.exports = { parseXmlFiles };
+export { parseXmlFiles };
 
 async function* collectXmlFiles(path) {
   const globber = await glob.create(path, {
