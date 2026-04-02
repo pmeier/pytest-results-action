@@ -1,6 +1,6 @@
 {
   "name": "pytest-results-actions",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Post pytest results to the workflow summary",
   "main": "src/main.js",
   "scripts": {
