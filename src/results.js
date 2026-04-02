@@ -1,10 +1,8 @@
-const fs = require("fs").promises;
+import * as gha from "@actions/core";
 
-const gha = require("@actions/core");
+import { zip, prettyDuration } from "./utils.js";
 
-const { zip, prettyDuration } = require("./utils");
-
-module.exports = { postResults };
+export { postResults };
 
 // FIXME: refactor
 const resultTypes = [
@@ -107,7 +105,7 @@ async function addResults(results, title, summary, displayOptions) {
     addSummary(results);
   }
 
-  for (resultType of getResultTypesFromDisplayOptions(displayOptions)) {
+  for (const resultType of getResultTypesFromDisplayOptions(displayOptions)) {
     const results_for_type = results[resultType];
     if (!results_for_type.length) {
       continue;
