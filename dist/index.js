@@ -1,4 +1,3 @@
-import { createRequire as __WEBPACK_EXTERNAL_createRequire } from "module";
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
@@ -5516,7 +5515,7 @@ function zip(a, b) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("assert");
+module.exports = require("assert");
 
 /***/ }),
 
@@ -5524,7 +5523,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("assert");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("crypto");
+module.exports = require("crypto");
 
 /***/ }),
 
@@ -5532,7 +5531,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("crypto");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("events");
+module.exports = require("events");
 
 /***/ }),
 
@@ -5540,7 +5539,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("events");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs");
+module.exports = require("fs");
 
 /***/ }),
 
@@ -5548,7 +5547,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("http");
+module.exports = require("http");
 
 /***/ }),
 
@@ -5556,7 +5555,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("http");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("https");
+module.exports = require("https");
 
 /***/ }),
 
@@ -5564,7 +5563,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("https");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("net");
+module.exports = require("net");
 
 /***/ }),
 
@@ -5572,7 +5571,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("net");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("os");
+module.exports = require("os");
 
 /***/ }),
 
@@ -5580,7 +5579,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("os");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("path");
+module.exports = require("path");
 
 /***/ }),
 
@@ -5588,7 +5587,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("path");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("stream");
+module.exports = require("stream");
 
 /***/ }),
 
@@ -5596,7 +5595,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("stream");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("tls");
+module.exports = require("tls");
 
 /***/ }),
 
@@ -5604,7 +5603,7 @@ module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("tls");
 /***/ ((module) => {
 
 "use strict";
-module.exports = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("util");
+module.exports = require("util");
 
 /***/ }),
 
