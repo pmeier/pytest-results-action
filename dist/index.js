@@ -5257,7 +5257,7 @@ async function main(inputs) {
   const { isEmpty, generator } = await checkAsyncGeneratorEmpty(xmls);
   if (isEmpty && inputs.failOnEmpty) {
     gha.setFailed(
-      "No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case"
+      "No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case",
     );
   }
   xmls = generator;
@@ -5291,8 +5291,8 @@ const resultTypes = [
 const resultTypesWithEmoji = zip(
   resultTypes,
   ["green", "yellow", "yellow", "red", "red", "red"].map(
-    (color) => `:${color}_circle:`
-  )
+    (color) => `:${color}_circle:`,
+  ),
 );
 
 async function postResults(xmls, inputs) {
@@ -5393,7 +5393,7 @@ async function addResults(results, title, summary, displayOptions) {
         addDetailsWithCodeBlock(
           gha.summary,
           gha.summary.wrap("code", result.id),
-          result.msg
+          result.msg,
         );
       } else {
         gha.summary.addRaw(`\n:heavy_check_mark: ${result.id}`, true);
@@ -5405,7 +5405,7 @@ async function addResults(results, title, summary, displayOptions) {
 function addSummary(results) {
   gha.summary.addRaw(
     `Ran ${results.total_tests} tests in ${prettyDuration(results.total_time)}`,
-    true
+    true,
   );
 
   var rows = [["Result", "Amount"]];
@@ -5452,7 +5452,7 @@ function getResultTypesFromDisplayOptions(displayOptions) {
 function addDetailsWithCodeBlock(summary, label, code) {
   return summary.addDetails(
     label,
-    "\n\n" + summary.wrap("pre", summary.wrap("code", code))
+    "\n\n" + summary.wrap("pre", summary.wrap("code", code)),
   );
 }
 
