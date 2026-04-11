@@ -1,4 +1,4 @@
-module.exports = { checkAsyncGeneratorEmpty, prettyDuration, zip };
+export { checkAsyncGeneratorEmpty, prettyDuration, zip };
 
 async function* prefixAsyncGenerator(prefix, gen) {
   yield prefix;

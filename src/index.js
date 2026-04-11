@@ -1,6 +1,6 @@
-const gha = require("@actions/core");
+import * as gha from "@actions/core";
 
-const { main } = require("./main");
+import { main } from "./main.js";
 
 async function entrypoint() {
   const inputs = getInputs();

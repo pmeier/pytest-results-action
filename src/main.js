@@ -1,11 +1,9 @@
-module.exports = { main };
+import * as gha from "@actions/core";
+import { checkAsyncGeneratorEmpty } from "./utils.js";
+import { parseXmlFiles } from "./io.js";
+import { postResults } from "./results.js";
 
-const gha = require("@actions/core");
-const { checkAsyncGeneratorEmpty } = require("./utils");
-const { parseXmlFiles } = require("./io");
-const { postResults } = require("./results");
-
-async function main(inputs) {
+export async function main(inputs) {
   var xmls = parseXmlFiles(inputs.path);
 
   const { isEmpty, generator } = await checkAsyncGeneratorEmpty(xmls);
