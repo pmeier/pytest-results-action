@@ -9,7 +9,7 @@ export async function main(inputs) {
   const { isEmpty, generator } = await checkAsyncGeneratorEmpty(xmls);
   if (isEmpty && inputs.failOnEmpty) {
     gha.setFailed(
-      "No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case"
+      "No JUnit XML file was found. Set `fail-on-empty: false` if that is a valid use case",
     );
   }
   xmls = generator;
