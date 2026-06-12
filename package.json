@@ -26,7 +26,7 @@
     "fast-xml-parser": "^5.5"
   },
   "devDependencies": {
-    "@vercel/ncc": "^0.38",
+    "@vercel/ncc": "^0.44",
     "prettier": "^3.8"
   }
 }
